@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.JiaocaiChuruInoutListDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.jiaocai_churu_inout_id as jiaocaiChuruInoutId
+        ,a.jiaocai_id as jiaocaiId
+        ,a.jiaocai_churu_inout_list_number as jiaocaiChuruInoutListNumber
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.JiaocaiChuruInoutListView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,jiaocai.jiaocai_order_uuid_number as jiaocaiOrderUuidNumber
+        ,jiaocai.jiaocai_types as jiaocaiTypes
+        ,jiaocai.jiaocai_kucun_number as jiaocaiKucunNumber
+        ,jiaocai.jiaocai_new_money as jiaocaiNewMoney
+        ,jiaocaiChuruInout.jiaocai_churu_inout_uuid_number as jiaocaiChuruInoutUuidNumber
+        ,jiaocaiChuruInout.jiaocai_churu_inout_name as jiaocaiChuruInoutName
+        ,jiaocaiChuruInout.jiaocai_churu_inout_types as jiaocaiChuruInoutTypes
+        ,jiaocaiChuruInout.jiaocai_churu_inout_content as jiaocaiChuruInoutContent
+
+        FROM jiaocai_churu_inout_list  a
+        left JOIN jiaocai jiaocai ON a.jiaocai_id = jiaocai.id
+        left JOIN jiaocai_churu_inout jiaocaiChuruInout ON a.jiaocai_churu_inout_id = jiaocaiChuruInout.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.jiaocaiChuruInoutId != null and params.jiaocaiChuruInoutId != ''">
+                and (
+                    a.jiaocai_churu_inout_id = #{params.jiaocaiChuruInoutId}
+                )
+            </if>
+            <if test="params.jiaocaiId != null and params.jiaocaiId != ''">
+                and (
+                    a.jiaocai_id = #{params.jiaocaiId}
+                )
+            </if>
+            <if test="params.jiaocaiChuruInoutListNumberStart != null and params.jiaocaiChuruInoutListNumberStart != ''">
+                <![CDATA[  and a.jiaocai_churu_inout_list_number >= #{params.jiaocaiChuruInoutListNumberStart}   ]]>
+            </if>
+            <if test="params.jiaocaiChuruInoutListNumberEnd != null and params.jiaocaiChuruInoutListNumberEnd != ''">
+                <![CDATA[  and a.jiaocai_churu_inout_list_number <= #{params.jiaocaiChuruInoutListNumberEnd}   ]]>
+            </if>
+             <if test="params.jiaocaiChuruInoutListNumber != null and params.jiaocaiChuruInoutListNumber != ''">
+                and a.jiaocai_churu_inout_list_number = #{params.jiaocaiChuruInoutListNumber}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断教材信息的id不为空 -->
+            <if test=" params.jiaocaiIdNotNull != '' and params.jiaocaiIdNotNull != null and params.jiaocaiIdNotNull != 'null' ">
+                and a.jiaocai_id IS NOT NULL
+            </if>
+            <if test=" params.jiaocaiOrderUuidNumber != '' and params.jiaocaiOrderUuidNumber != null and params.jiaocaiOrderUuidNumber != 'null' ">
+                and jiaocai.jiaocai_order_uuid_number like CONCAT('%',#{params.jiaocaiOrderUuidNumber},'%')
+            </if>
+            <if test="params.jiaocaiTypes != null  and params.jiaocaiTypes != ''">
+                and jiaocai.jiaocai_types = #{params.jiaocaiTypes}
+            </if>
+
+            <if test="params.jiaocaiKucunNumberStart != null  and params.jiaocaiKucunNumberStart != '' ">
+                <![CDATA[  and jiaocai.jiaocai_kucun_number >= #{params.jiaocaiKucunNumberStart}   ]]>
+            </if>
+            <if test="params.jiaocaiKucunNumberEnd != null  and params.jiaocaiKucunNumberEnd != '' ">
+                <![CDATA[  and jiaocai.jiaocai_kucun_number <= #{params.jiaocaiKucunNumberEnd}   ]]>
+            </if>
+            <if test="params.jiaocaiKucunNumber != null  and params.jiaocaiKucunNumber != '' ">
+                and jiaocai.jiaocai_kucun_number = #{params.jiaocaiKucunNumber}
+            </if>
+            <if test="params.jiaocaiNewMoneyStart != null ">
+                <![CDATA[  and jiaocai.jiaocai_new_money >= #{params.jiaocaiNewMoneyStart}   ]]>
+            </if>
+            <if test="params.jiaocaiNewMoneyEnd != null ">
+                <![CDATA[  and jiaocai.jiaocai_new_money <= #{params.jiaocaiNewMoneyEnd}   ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiaocai.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiaocai.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断出入库的id不为空 -->
+            <if test=" params.jiaocaiChuruInoutIdNotNull != '' and params.jiaocaiChuruInoutIdNotNull != null and params.jiaocaiChuruInoutIdNotNull != 'null' ">
+                and a.jiaocai_churu_inout_id IS NOT NULL
+            </if>
+            <if test=" params.jiaocaiChuruInoutUuidNumber != '' and params.jiaocaiChuruInoutUuidNumber != null and params.jiaocaiChuruInoutUuidNumber != 'null' ">
+                and jiaocaiChuruInout.jiaocai_churu_inout_uuid_number like CONCAT('%',#{params.jiaocaiChuruInoutUuidNumber},'%')
+            </if>
+            <if test=" params.jiaocaiChuruInoutName != '' and params.jiaocaiChuruInoutName != null and params.jiaocaiChuruInoutName != 'null' ">
+                and jiaocaiChuruInout.jiaocai_churu_inout_name like CONCAT('%',#{params.jiaocaiChuruInoutName},'%')
+            </if>
+            <if test="params.jiaocaiChuruInoutTypes != null  and params.jiaocaiChuruInoutTypes != ''">
+                and jiaocaiChuruInout.jiaocai_churu_inout_types = #{params.jiaocaiChuruInoutTypes}
+            </if>
+
+            <if test=" params.jiaocaiChuruInoutContent != '' and params.jiaocaiChuruInoutContent != null and params.jiaocaiChuruInoutContent != 'null' ">
+                and jiaocaiChuruInout.jiaocai_churu_inout_content like CONCAT('%',#{params.jiaocaiChuruInoutContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiaocaiChuruInout.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiaocaiChuruInout.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
